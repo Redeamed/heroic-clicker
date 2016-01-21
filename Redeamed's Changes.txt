@@ -1,0 +1,28 @@
+CHANGES:
+Added comments for clarity
+Modified Ascend:
+	Added Sleep(1000) and ClickProgressionMode
+
+
+Modified Moved levelAllHeroes() from if irislevel to inside Grind method on a mod(i, 600) cycle
+
+
+MODIFIED Grind()
+	ADDED 
+		remainder := mod(i, 250)
+	
+	if(remainder = 0)
+	
+		{
+	levelAllHeroes()
+	}
+
+
+ADDED Method scrollUpSome
+
+ADDED Method scrollDownSome
+
+ADDED 
+global scrollSome := 10;
+
+Modified F11 to use built in Pause rather than local variable pause
