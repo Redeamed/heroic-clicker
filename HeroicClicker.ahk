@@ -321,7 +321,7 @@ irisStart()
 		turnOnProgressionMode := true
 		clickProgressionMode()
 	}
-	scrollToListTop();
+	scrollToListTop()
 }
 
 ;///////////////////////////////////GRIND //////////////////////////////////
