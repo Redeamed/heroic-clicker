@@ -1,6 +1,12 @@
 # Heroic Clicker 
-Version: 4.2
-Author: Shawn Goertzen (https://github.com/sgoertzen) (Adapted from: http://github.com/Andrux51)
+Version: 1
+Date: 1/19/2016
+Author: Redeamed (https://github.com/Redeamed)
+Adapted from: SGoertzen (v4.2)(https://github.com/sgoertzen)
+Which was Adapted from: Andrux51 (http://github.com/Andrux51)
+
+
+----Read Me may need Further Updating for new Features------
 
 ![Screenshot of UI](https://raw.githubusercontent.com/sgoertzen/heroic-clicker/master/Screenshot.png)
 

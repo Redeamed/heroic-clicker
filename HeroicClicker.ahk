@@ -2,7 +2,7 @@
 ;/// Version: 1.0
 ;/// Date: 1/19/2016
 ;/// Author: Redeamed (https://github.com/Redeamed)
-;/// Adapted from: SGoertzen (v3.1)(https://github.com/sgoertzen)
+;/// Adapted from: SGoertzen (v4.2)(https://github.com/sgoertzen)
 ;/// Adapted from: Andrux51 (http://github.com/Andrux51)
 ;///
 ;/// Instructions:
@@ -19,20 +19,22 @@
 global scrollSome := 10 ;  ////number of mouse chicks when scrolling the bar some
 
 ; ///DON'T CHANGE THESE HERE.  Make the adjustments in the Settings.ini file
-global minutesPerAscension := 120 ; ////How many minutes before it should ascend
-global idleMinutes := 0 ;			////How many minutes before it should ascend
-global irislevel := 0 ;				////Level of your iris ancient
-global timing := 25 ;				////change this value to adjust script speed (milliseconds)
-global keepInFront := 0
-global levelsPerHero := 25 ;			///// Number of levels per hero per cycle
+global minutesPerAscension	:= 120 ; ////How many minutes before it should ascend
+global idleMinutes			:= 0 ;	 ////How many minutes before it should ascend
+global irisLevel			:= 0 ;	 ////Level of your iris ancient
+global irisJump				:= 13 ;  ///// Current default number
+global timing				:= 25 ;	 ////change this value to adjust script speed (milliseconds)
+global keepInFront			:= 0
+global timeTillLevelScreen  := 10 ;	 ///// Number of levels per hero per cycle
+global levelsPerHero		:= 25 ;	 ///// Number of levels per hero per cycle
 
 #SingleInstance force ;				//// if script is opened again, replace instance
 
 global title			:= "Clicker Heroes" ;	//// we will exact match against this for steam version
 global stop				:= false
 global idling			:= false
-;//global pause			:= false
-;////////////////////////////////
+
+
 global CLICK_STORM		:= 170
 global POWER_SURGE		:= 220
 global LUCKY_STRIKES	:= 270
@@ -63,30 +65,35 @@ showGui()
   ;///////////// Read the options from the ini, with defaults///////////////////////
 
   IniRead, minutesPerAscension, Settings.ini, HeroicClicker, MinutesPerAscension, %minutesPerAscension%
-  IniRead, idleMinutes,			Settings.ini, HeroicClicker, IdleMinutes, %idleMinutes%
-  IniRead, irislevel,			Settings.ini, HeroicClicker, IrisLevel, %irislevel%
-  IniRead, ascendOnStart,		Settings.ini, HeroicClicker, AscendOnStart, 0
-  IniRead, keepInFront,			Settings.ini, HeroicClicker, KeepInFront, 0
-  IniRead, levelsPerHero,		Settings.ini, HeroicClicker, levelsPerHero, 25
+  IniRead, idleMinutes,			Settings.ini, HeroicClicker, IdleMinutes		, %idleMinutes%
+  IniRead, irisLevel,			Settings.ini, HeroicClicker, IrisLevel			, %irisLevel%
+  IniRead, irisJump,			Settings.ini, HeroicClicker, IrisJump			, %irisJump%
+  IniRead, timeTillLevelScreen, Settings.ini, HeroicClicker, TimeTillLevelScreen, %timeTillLevelScreen%
+  IniRead, levelsPerHero,		Settings.ini, HeroicClicker, LevelsPerHero		, %levelsPerHero%
+  IniRead, ascendOnStart,		Settings.ini, HeroicClicker, AscendOnStart		, 0
+  IniRead, keepInFront,			Settings.ini, HeroicClicker, KeepInFront		, 0
   
   ;//////////////////display //////////////////////////////////
   ;
   ;////////Text only values
   Gui, Add, Text, , Iris Level: 
+  Gui, Add, Text, , Number of levels to jump:
   Gui, Add, Text, , Minutes Per Ascension:
   Gui, Add, Text, , Idle minutes before clicking:
+  Gui, Add, Text, , Time Between Leveling Heroes on Screen:
   Gui, Add, Text, , Levels Per Hero:
   ;
   ;/////////////editable values
-  Gui, Add, Edit, w100 Number vEnteredLevel ym, %irislevel%  ; The ym option starts a new column of controls.
-  Gui, Add, Edit, Number vEnteredMinutes, %minutesPerAscension%
-  Gui, Add, Edit, Number vEnteredIdleMinutes, %idleMinutes%
-
-  Gui, Add, Edit, Number vEnteredLevelsPerHero, %levelsPerHero%
+  Gui, Add, Edit, w100 Number vEnteredLevel ym           , %irisLevel%  ; The ym option starts a new column of controls.
+  Gui, Add, Edit,      Number vEnteredIrisJump	         , %irisJump%
+  Gui, Add, Edit,      Number vEnteredMinutes            , %minutesPerAscension%
+  Gui, Add, Edit,      Number vEnteredIdleMinutes        , %idleMinutes%
+  Gui, Add, Edit,	   Number vEnteredTimeTillLevelScreen, %timeTillLevelScreen%
+  Gui, Add, Edit,	   Number vEnteredLevelsPerHero      , %levelsPerHero%
   ;
   ;///////////togglable checkboxes
   Gui, Add, Checkbox, Checked%ascendOnStart% vEntertedAscendOnStart, Start with Ascension
-  Gui, Add, Checkbox, Checked%keepInFront% vEntertedKeepInFront, Keep window active
+  Gui, Add, Checkbox, Checked%keepInFront% vEntertedKeepInFront    , Keep window active
   ;
   ;/////Run Button
   Gui, Add, Button, default, &Run
@@ -94,14 +101,16 @@ showGui()
   ;
   ;//////Hint Texts
   Gui, Add, Text, ym, (Set to zero if you don't have iris)
-  Gui, Add, Text, ,(Set to zero to never auto ascend)
-  Gui, Add, Text, ,(Set to zero to never idle)
-  Gui, Add, Text, ,(If checked, it will ascend first before auto-playing)
-  Gui, Add, Text, ,(Will bring the game to the front as necessary)
+  Gui, Add, Text,	, (number of levels you jump to reach iris)
+  Gui, Add, Text,	, (Set to zero to never auto ascend)
+  Gui, Add, Text,	, (Set to zero to never idle)
+  Gui, Add, Text,	, (Wait time until the code will level visible heroes)
+  Gui, Add, Text,	, (number of levels each hero gets each cycle)
+  Gui, Add, Text,	, (If checked, it will ascend first before auto-playing)
+  Gui, Add, Text,	, (Will bring the game to the front as necessary)
 
-  Gui, Add, Text, ,(number of levels each hero gets each cycle)
 
-  Gui, Add, Text, ,(Once running use F11 to pause, F12 to exit)
+  Gui, Add, Text,   ,(Once running use F11 to pause, F12 to exit)
   ;
   ;/////Display the gui after set up?
   Gui, Show,, Heroic Clicker
@@ -117,16 +126,19 @@ ButtonRun:
   minutesPerAscension := EnteredMinutes
   idleMinutes := EnteredIdleMinutes
   irisLevel := EnteredLevel
+  irisJump := EnteredIrisJump
   keepInFront := KeepInFront
+  timeTillLevelScreen := EnteredTimeTillLevelScreen
   levelsPerHero := EnteredLevelsPerHero
   ;
   ;//////////////////Write player input values to settings file
-  IniWrite, %minutesPerAscension%, Settings.ini, HeroicClicker, MinutesPerAscension
-  IniWrite, %idleMinutes%, Settings.ini, HeroicClicker, IdleMinutes
-  IniWrite, %irislevel%, Settings.ini, HeroicClicker, IrisLevel
+  IniWrite, %minutesPerAscension%,   Settings.ini, HeroicClicker, MinutesPerAscension
+  IniWrite, %idleMinutes%,           Settings.ini, HeroicClicker, IdleMinutes
+  IniWrite, %irisLevel%,			 Settings.ini, HeroicClicker, IrisLevel
   IniWrite, %EntertedAscendOnStart%, Settings.ini, HeroicClicker, AscendOnStart
-  IniWrite, %EntertedKeepInFront%, Settings.ini, HeroicClicker, KeepInFront
-  IniWrite, %EnteredLevelsPerHero%, Settings.ini, HeroicClicker, levelsPerHero
+  IniWrite, %EntertedKeepInFront%,   Settings.ini, HeroicClicker, KeepInFront
+  IniWrite, %EnteredTimeTillLevelScreen%,  Settings.ini, HeroicClicker, timeTillLevelScreen
+  IniWrite, %EnteredLevelsPerHero%,  Settings.ini, HeroicClicker, levelsPerHero
   ;///////////////////////////////////////////////////////////////////////////
   ;
   ;
@@ -169,6 +181,7 @@ doEverything(shouldAscend) {
 
   setDefaults()
   startTimer()
+  startLevelHeroTimer()
   
   while (true) 
   {
@@ -184,6 +197,15 @@ doEverything(shouldAscend) {
         irisStart()
         
       }
+	  else
+	  {
+		
+		 Sleep 1000
+		 if(isProgressionModeOff())
+		 {
+				clickProgressionMode()
+		 }
+	  }
 
     }
 
@@ -211,6 +233,15 @@ startIdleTimer(){
     SetTimer, IdleTimer, %idleTimeInMilli%
   }
 }
+testValue := 0
+startLevelHeroTimer()
+{ if (timeTillLevelScreen > 0) 
+{
+    levelHeroTimeInMilli := timeTillLevelScreen * 60 * 1000
+    SetTimer, HeroLevelTimer, %levelHeroTimeInMilli%
+	
+  }
+}
 
 AscensionTimer:
   stop := true
@@ -219,6 +250,26 @@ AscensionTimer:
 IdleTimer:
    idling := false
    SetTimer, IdleTimer, OFF
+   return
+
+HeroLevelTimer:
+
+		upgradeHerosOnScreen(levelsPerHero) 
+		scrollDownSome()
+		if(testValue >= 10)
+		{
+		
+			clickBuyAvailableUpgrades()
+			sleep 300
+			scrollToListTop()
+			testValue = 0;
+		}
+		else
+		{
+		testValue++
+		}
+		
+	startLevelHeroTimer()
    return
   ;////////////////////////////////////////////////////////////
 
@@ -231,11 +282,6 @@ ascend()
   Sleep 1000
   ; Click ok button
   ControlClick,, %title%,,,, x493 y481 NA
-  Sleep 1000
-  if(isProgressionModeOff())
-  {
-		clickProgressionMode()
-  }
 }
 ;//////////////////////////////////////////////////////////////////
 irisStart() 
@@ -248,7 +294,7 @@ irisStart()
   }
 
   ; Go up by twelve levels at a time
-  steps := Round(irislevel / 13)
+  steps := Round(Round(irislevel / irisjump))
   Loop, %steps% 
   {
     if(stop) 
@@ -258,7 +304,7 @@ irisStart()
     scrollToListBottom()
     clickHeroInSlot(2,25)
 
-    scrollToFarmZone(13)
+    scrollToFarmZone(irisjump)
 
     ; Let it get some gold on this new level
     Loop, 10 
@@ -270,9 +316,12 @@ irisStart()
     }
   }
   
-               
-	turnOnProgressionMode := true
-	clickProgressionMode()
+    if (isProgressionModeOff())
+	{       
+		turnOnProgressionMode := true
+		clickProgressionMode()
+	}
+	scrollToListTop();
 }
 
 ;///////////////////////////////////GRIND //////////////////////////////////
@@ -306,8 +355,8 @@ grind()
       }
     }
         
-		remainder := mod(i, 1200)  ;///does nothing unless lower than 1000
-    if(remainder = 0) 
+	remainder := mod(i, 100)  ;///does nothing unless lower than 1000
+    if(timeTillLevelScreen <= 0 && remainder = 0) ;///only runs if level heros on screen is disabled
 	{     
 
       gildInSecond := isGildedHeroInSecondSlot()
@@ -334,15 +383,15 @@ grind()
       }
     }
 
-
-	remainder := mod(i, 100)
-	if(remainder = 0)
-	{
-		upgradeHerosOnScreen(10)
-		scrollDownSome()
-
-	}
-
+	;///Disabled for now while testing Timer based leveling
+	;///remainder := mod(i, 100)
+	;///if(remainder = 0)
+	;///{
+	;///	upgradeHerosOnScreen(levelsPerHero) 
+	;///	scrollDownSome()
+	;///  
+	;///}
+	;///   
 		remainder := mod(i, 200)
     if(remainder = 0) 
 	{
@@ -356,9 +405,13 @@ grind()
     i++
     if (i>1000) 
 	{
-	clickBuyAvailableUpgrades()
-	sleep 300
-	scrollToListTop()
+	if (timeTillLevelScreen <= 0 i>1000) 
+	{
+		clickBuyAvailableUpgrades()
+		sleep 300
+		scrollToListTop()
+	}
+
 	useAbilities()
       i = 1
 
@@ -376,7 +429,9 @@ grind()
 ;/////////////// RELICS /////////////////////////////////
 salvageRelics() 
 {
-  ControlClick,, %title%,,,, x373 y100 NA ; Click relics tab
+
+;////rest to x373 after powerbloop ends
+  ControlClick,, %title%,,,, x323 y100 NA ; Click relics tab
   Sleep 500  
   ControlClick,, %title%,,,, x278 y439 NA ; Click Salvage
   Sleep 500
@@ -525,7 +580,7 @@ scrollToFarmZone(zone)
     looper := 0
     while(looper < clicksToFarmZone) {
         clickForwardArrow(1)
-        Sleep 5
+        Sleep 10
         looper++
     }
 
@@ -572,28 +627,35 @@ upgradeHerosOnScreen(value)
   ;// screen clicking the entire time.  This means some heroes will
   ;// have more upgrades then others but everyone will be at
   ;// at least 150
-  bringToFront()
+  ;//bringToFront() ;//should be unneccesaay as it is called in isClickerHeroesWindowActive
   
   ;// If the window is active we can great increase the speed of this by
   ;// holding down 'Z' while clicking
 
-  if (isClickerHeroesWindowActive()) 
+  if (isClickerHeroesWindowActive() && value > 25) 
   {
 		Send {z down}
-		value =  1
+		value =  Round(value / 25)
 	
 
-	
 	;////ControlSend,, {z down}, %title%
     
   }
-  ypos := 600
-  while (ypos >= 200) 
-  {
-	  ypos -= 6
-      ControlClick,, %title%,,,value, x50 y%ypos% NA
-	
-  }
+
+
+  ;//ypos := 600
+  ;//while (ypos >= 200) 
+  ;//{
+  ;//  ypos -= 6
+  ;//    ControlClick,, %title%,,,value, x50 y%ypos% NA
+  ;//}
+
+  clickHeroInSlot(1,value)
+  clickHeroInSlot(2,value)
+  clickHeroInSlot(3,value)
+  clickHeroInSlot(4,value)
+
+
   if (isClickerHeroesWindowActive()) 
   {
     Send {z up}
@@ -639,7 +701,6 @@ scrollToListBottom()
     return
 }
 
-;/////WORK
 scrollUpSome()
 {
 
